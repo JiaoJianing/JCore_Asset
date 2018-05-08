@@ -52,6 +52,6 @@ void main()
 		col += sampleTex[i] * kernel[i];
 	}
 
-	//FragColor = vec4(col, 1.0);
-	FragColor = texture(scene, texCoord);
+	FragColor = vec4(col, 1.0);
+	//FragColor = texture(scene, texCoord);
 };

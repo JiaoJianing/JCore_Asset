@@ -7,7 +7,7 @@ uniform vec3 highLightColor;
 uniform vec3 viewPos;
 
 uniform bool useTexture;
-uniform sampler2D cubeTexture;
+uniform sampler2D customTexture;
 
 in vec2 texCoord;
 in vec3 normal;
@@ -20,7 +20,7 @@ void main()
 
 	vec3 result = cubeColor;
 	if (useTexture){
-		result = texture(cubeTexture, texCoord).rgb;
+		result = texture(customTexture, texCoord).rgb;
 	}
 
 	if (highLight){
