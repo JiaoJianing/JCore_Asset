@@ -18,6 +18,7 @@ uniform Material material;
 uniform DirLight dirLight;
 uniform vec3 viewPos;
 uniform vec3 g_Color;
+uniform vec3 g_highLightColor;
 
 in vec2 texCoord;
 in vec3 fragPos;
@@ -38,6 +39,11 @@ void main()
 	vec3 temp = texture(material.texture_normal1, texCoord).rgb;
 	
 	vec3 result = calcDirLight(dirLight, normal, viewDir);
+	
+	if (g_highLight){
+		float p = dot(viewDir, normal);
+		result = mix(result, g_highLightColor, p);
+	}
 	
 	FragColor = vec4(result, 1.0);
 };
