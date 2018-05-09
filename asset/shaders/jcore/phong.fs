@@ -20,22 +20,24 @@ uniform vec3 viewPos;
 uniform vec3 g_Color;
 
 in vec2 texCoord;
-in vec3 normal;
 in vec3 fragPos;
+in mat3 TBN;
 
 //计算方向光照
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 
 void main()
 {
-	//单位化法向量
-	vec3 norm = normalize(normal);
+	//用TBN矩阵计算法向量
+	vec3 normal = texture(material.texture_normal1, texCoord).rgb;
+	normal = normalize(normal * 2.0 - 1.0);//to [-1,1]
+	normal = normalize(TBN * normal);
 	//单位化视线方向
 	vec3 viewDir = normalize(viewPos - fragPos);
 	
 	vec3 temp = texture(material.texture_normal1, texCoord).rgb;
 	
-	vec3 result = calcDirLight(dirLight, norm, viewDir);
+	vec3 result = calcDirLight(dirLight, normal, viewDir);
 	
 	FragColor = vec4(result, 1.0);
 };

@@ -29,5 +29,5 @@ void main()
 		texColor = mix(texColor, g_highLightColor, p);
 	}
 
-	FragColor = vec4(texColor, 1.0) * vec4(g_Color, 1.0);
+	FragColor = vec4(texColor, 1.0);
 };

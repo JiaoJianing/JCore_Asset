@@ -10,14 +10,19 @@ uniform mat4 view;
 uniform mat4 projection;
 
 out vec2 texCoord;
-out vec3 normal;
 out vec3 fragPos;
+out mat3 TBN;
 
 void main()						
 {
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 	texCoord = aTexCoord;
-	mat3 normalMat = transpose(inverse(mat3(model)));
-	normal = normalMat * aNormal;
 	fragPos = vec3(model * vec4(aPos, 1.0));
+	
+	//计算TBN矩阵
+	vec3 T = normalize(vec3(model * vec4(aTangent, 0.0)));
+	vec3 N = normalize(vec3(model * vec4(aNormal, 0.0)));
+	T = normalize(T - dot(T, N) * N);
+	vec3 B = cross(T, N);
+	TBN = mat3(T, B, N);
 };
