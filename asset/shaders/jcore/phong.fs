@@ -18,11 +18,13 @@ uniform Material material;
 uniform DirLight dirLight;
 uniform vec3 viewPos;
 uniform vec3 g_Color;
+uniform bool g_highLight;
 uniform vec3 g_highLightColor;
 
 in vec2 texCoord;
 in vec3 fragPos;
 in mat3 TBN;
+
 
 //计算方向光照
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
