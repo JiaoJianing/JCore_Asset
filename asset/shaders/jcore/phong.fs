@@ -7,15 +7,35 @@ struct Material{
 	sampler2D texture_specular1;
 };
 
-struct DirLight{
-	vec3 lightColor;
-	vec3 lightPos;
+struct BaseLight{
+	vec3 color;
 	float ambientIntensity;
-	float diffuseIntensity;
+	float diffuseIntensity; 
 };
 
+struct DirLight{
+	BaseLight base;
+	vec3 direction;
+};
+
+struct Attenuation
+{
+	float constant;
+	float linear;
+	float exp;
+};
+
+struct PointLight{
+	BaseLight base;
+	Attenuation attenuation;
+	vec3 position;
+};
+
+#define MAX_POINT_LIGHTS 10
 uniform Material material;
 uniform DirLight dirLight;
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform int pointLightNum;
 uniform vec3 viewPos;
 uniform vec3 g_Color;
 uniform bool g_highLight;
@@ -25,9 +45,12 @@ in vec2 texCoord;
 in vec3 fragPos;
 in mat3 TBN;
 
-
+//计算光照通用部分
+vec3 calcLightCommon(BaseLight light, vec3 lightDirection, vec3 normal);
 //计算方向光照
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
+//计算点光照
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir);
 
 void main()
 {
@@ -37,11 +60,16 @@ void main()
 	normal = normalize(TBN * normal);
 	//单位化视线方向
 	vec3 viewDir = normalize(viewPos - fragPos);
-	
-	vec3 temp = texture(material.texture_normal1, texCoord).rgb;
-	
+	//平行光照
 	vec3 result = calcDirLight(dirLight, normal, viewDir);
+	//点光照
+	for (int i=0; i<pointLightNum; i++){
+		result += calcPointLight(pointLights[i], normal, viewDir);
+	}
 	
+	//聚光灯
+	
+	//高亮效果
 	if (g_highLight){
 		float p = dot(viewDir, normal);
 		result = mix(result, g_highLightColor, p);
@@ -50,22 +78,37 @@ void main()
 	FragColor = vec4(result, 1.0);
 };
 
-vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir){
+vec3 calcLightCommon(BaseLight light, vec3 lightDirection, vec3 normal, vec3 viewDir){
 	//diffuse贴图颜色
 	vec3 diffuseTex = texture(material.texture_diffuse1, texCoord).rgb;
 	//specular贴图颜色
 	vec3 specularTex = texture(material.texture_specular1, texCoord).rgb;
 	//光源方向
-	vec3 lightDir = normalize(light.lightPos);
+	vec3 lightDir = lightDirection;
 	//环境光
-	vec3 ambient = light.lightColor * diffuseTex * light.ambientIntensity;
+	vec3 ambient = light.color * diffuseTex * light.ambientIntensity;
 	//漫反射
 	float diff = max(dot(normal, lightDir), 0.0);
-	vec3 diffuse = light.lightColor * light.diffuseIntensity * diffuseTex * diff;
+	vec3 diffuse = light.color * light.diffuseIntensity * diffuseTex * diff;
 	//镜面反射
 	vec3 halfwayDir = normalize(lightDir + viewDir);
 	float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
-	vec3 specular = light.lightColor * specularTex * spec;
+	vec3 specular = light.color * specularTex * spec;
 	
 	return (ambient + diffuse + specular);
+}
+
+vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir){	
+	return calcLightCommon(light.base, normalize(light.direction), normal, viewDir);
+}
+
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir){
+	vec3 lightDirection = light.position - fragPos;
+	float distance = length(lightDirection);
+	
+	vec3 result = calcLightCommon(light.base, normalize(lightDirection), normal, viewDir);
+	float attenuation = light.attenuation.constant + 
+						light.attenuation.linear * distance +
+						light.attenuation.exp * distance * distance;
+	return result / attenuation;
 }
