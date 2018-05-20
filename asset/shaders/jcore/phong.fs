@@ -51,19 +51,24 @@ uniform vec3 viewPos;
 uniform vec3 g_Color;
 uniform bool g_highLight;
 uniform vec3 g_highLightColor;
+uniform sampler2D texture_shadowmap;
 
 in vec2 texCoord;
 in vec3 fragPos;
+in vec4 lightSpacePos;
 in mat3 TBN;
 
 //计算光照通用部分
-vec3 calcLightCommon(BaseLight light, vec3 lightDirection, vec3 normal);
+vec3 calcLightCommon(BaseLight light, vec3 lightDirection, vec3 normal, float shadowFactor);
 //计算方向光照
-vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
+vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir, float shadowFactor);
 //计算点光照
-vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir);
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, float shadowFactor);
 //计算聚光
-vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir);
+vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir, float shadowFactor);
+
+//计算shadowmap
+float calcShadowFactor(vec4 lSpacePos);
 
 void main()
 {
@@ -71,20 +76,22 @@ void main()
 	vec3 normal = texture(material.texture_normal1, texCoord).rgb;
 	normal = normalize(normal * 2.0 - 1.0);//to [-1,1]
 	normal = normalize(TBN * normal);
+	//计算shadowmap
+	float shadowFactor = calcShadowFactor(lightSpacePos);
 	//单位化视线方向
 	vec3 viewDir = normalize(viewPos - fragPos);
 	vec3 result = vec3(0.0);
 	//平行光照
 	for (int i=0; i<dirLightNum; i++){
-		result += calcDirLight(dirLights[i], normal, viewDir);
+		result += calcDirLight(dirLights[i], normal, viewDir, shadowFactor);
 	}
 	//点光照
 	for (int i=0; i<pointLightNum; i++){
-		result += calcPointLight(pointLights[i], normal, viewDir);
+		result += calcPointLight(pointLights[i], normal, viewDir, shadowFactor);
 	}
 	//聚光灯
 	for (int i=0; i<spotLightNum; i++){
-		result += calcSpotLight(spotLights[i], normal, viewDir);
+		result += calcSpotLight(spotLights[i], normal, viewDir, shadowFactor);
 	}
 	
 	//高亮效果
@@ -96,7 +103,7 @@ void main()
 	FragColor = vec4(result, 1.0);
 };
 
-vec3 calcLightCommon(BaseLight light, vec3 lightDirection, vec3 normal, vec3 viewDir){
+vec3 calcLightCommon(BaseLight light, vec3 lightDirection, vec3 normal, vec3 viewDir, float shadowFactor){
 	//diffuse贴图颜色
 	vec3 diffuseTex = texture(material.texture_diffuse1, texCoord).rgb;
 	//specular贴图颜色
@@ -113,33 +120,58 @@ vec3 calcLightCommon(BaseLight light, vec3 lightDirection, vec3 normal, vec3 vie
 	float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
 	vec3 specular = light.color * specularTex * spec;
 	
-	return (ambient + diffuse + specular);
+	return (ambient + (1-shadowFactor) * (diffuse + specular));
 }
 
-vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir){	
-	return calcLightCommon(light.base, normalize(light.direction), normal, viewDir);
+vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir, float shadowFactor){	
+	return calcLightCommon(light.base, normalize(light.direction), normal, viewDir, shadowFactor);
 }
 
-vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir){
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, float shadowFactor){
 	vec3 lightDirection = light.position - fragPos;
 	float distance = length(lightDirection);
 	
-	vec3 result = calcLightCommon(light.base, normalize(lightDirection), normal, viewDir);
+	vec3 result = calcLightCommon(light.base, normalize(lightDirection), normal, viewDir, shadowFactor);
 	float attenuation = light.attenuation.constant + 
 						light.attenuation.linear * distance +
 						light.attenuation.exp * distance * distance;
 	return result / attenuation;
 }
 
-vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir){
+vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir, float shadowFactor){
 	vec3 lightDirection = normalize(fragPos - light.base.position);
 	float spotFactor = dot(lightDirection, normalize(light.direction));
 
 	vec3 result = vec3(0.0);
 	if (spotFactor > light.cutoff){
-		result = calcPointLight(light.base, normal, viewDir);
+		result = calcPointLight(light.base, normal, viewDir, shadowFactor);
 		return result * (1.0 - (1.0 - spotFactor) * 1.0 / (1.0 - light.cutoff));
 	}
 
 	return result;
+}
+
+float calcShadowFactor(vec4 lSpacePos){
+	vec3 projCoords = lSpacePos.xyz / lSpacePos.w;
+	projCoords = projCoords * 0.5 + 0.5;
+    float currentDepth = projCoords.z;
+
+	float bias = 0.001;
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / textureSize(texture_shadowmap, 0);
+	for(int x = -1; x <= 1; ++x)
+	{
+		for(int y = -1; y <= 1; ++y)
+		{
+			float pcfDepth = texture(texture_shadowmap, projCoords.xy + vec2(x, y) * texelSize).r; 
+			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+		}    
+	}
+	shadow /= 9.0;
+
+	if (projCoords.z > 1.0){
+		shadow = 0.0;
+	}
+
+	return shadow;
 }

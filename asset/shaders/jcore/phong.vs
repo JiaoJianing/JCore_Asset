@@ -8,9 +8,11 @@ layout (location=4) in vec3 aBiTangent;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 lightSpaceMat;
 
 out vec2 texCoord;
 out vec3 fragPos;
+out vec4 lightSpacePos;
 out mat3 TBN;
 
 void main()						
@@ -18,6 +20,7 @@ void main()
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 	texCoord = aTexCoord;
 	fragPos = vec3(model * vec4(aPos, 1.0));
+	lightSpacePos = lightSpaceMat * model * vec4(aPos, 1.0);
 	
 	//计算TBN矩阵
 	vec3 T = normalize(vec3(model * vec4(aTangent, 0.0)));
