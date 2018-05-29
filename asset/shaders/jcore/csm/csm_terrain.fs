@@ -61,21 +61,23 @@ void main()
 	//shadow
 	float ShadowFactor = 0.0;
     vec4 CascadeIndicator = vec4(0.0, 0.0, 0.0, 0.0);
-
-    for (int i = 0 ; i < 3 ; i++) {
-        if (clipSpacePosZ <= cascadeSpace[i]) {
-            ShadowFactor = calcShadowFactor(i, lightSpacePos[i]);
-
-            if (i == 0) 
-                CascadeIndicator = vec4(0.1, 0.0, 0.0, 0.0);
-            else if (i == 1)
-                CascadeIndicator = vec4(0.0, 0.1, 0.0, 0.0);
-            else if (i == 2)
-                CascadeIndicator = vec4(0.0, 0.0, 0.1, 0.0);
-
-            break;
-        }
-   }
+	//计算shadowmap	在3张阴影贴图间插值
+	float shadowFactor = 0.0;
+	if (clipSpacePosZ <= cascadeSpace[0]){
+		float ShadowFactor0 = calcShadowFactor(0, lightSpacePos[0]);
+		float ShadowFactor1 = calcShadowFactor(1, lightSpacePos[1]);
+		CascadeIndicator = vec4(0.1, 0.0, 0.0, 0.0);
+		ShadowFactor = mix(ShadowFactor0, ShadowFactor1, clipSpacePosZ / cascadeSpace[0]);
+	}else if (clipSpacePosZ <= cascadeSpace[1]){
+		float ShadowFactor1 = calcShadowFactor(1, lightSpacePos[1]);
+		float ShadowFactor2 = calcShadowFactor(2, lightSpacePos[2]);
+		CascadeIndicator = vec4(0.0, 0.1, 0.0, 0.0);
+		ShadowFactor = mix(ShadowFactor1, ShadowFactor2, (clipSpacePosZ-cascadeSpace[0]) / (cascadeSpace[1]-cascadeSpace[0]));
+	}else if (clipSpacePosZ <= cascadeSpace[2]){
+		float ShadowFactor2 = calcShadowFactor(2, lightSpacePos[2]);
+        CascadeIndicator = vec4(0.0, 0.0, 0.1, 0.0);
+		ShadowFactor = ShadowFactor2;
+	}
 
 	//光源方向
 	vec3 lightDir = normalize(lightDirection);

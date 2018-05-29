@@ -47,14 +47,21 @@ void main()
 	vec3 normal = texture(material.texture_normal1, texCoord).rgb;
 	normal = normalize(normal * 2.0 - 1.0);//to [-1,1]
 	normal = normalize(TBN * normal);
-	//计算shadowmap	
+	//计算shadowmap	在3张阴影贴图间插值
 	float shadowFactor = 0.0;
-    for (int i = 0 ; i < 3 ; i++) {
-        if (clipSpacePosZ <= cascadeSpace[i]) {
-            shadowFactor = calcShadowFactor(i, lightSpacePos[i]);
-            break;
-        }
-   }
+	if (clipSpacePosZ <= cascadeSpace[0]){
+		float ShadowFactor0 = calcShadowFactor(0, lightSpacePos[0]);
+		float ShadowFactor1 = calcShadowFactor(1, lightSpacePos[1]);
+		shadowFactor = mix(ShadowFactor0, ShadowFactor1, clipSpacePosZ / cascadeSpace[0]);
+	}else if (clipSpacePosZ <= cascadeSpace[1]){
+		float ShadowFactor1 = calcShadowFactor(1, lightSpacePos[1]);
+		float ShadowFactor2 = calcShadowFactor(2, lightSpacePos[2]);
+		shadowFactor = mix(ShadowFactor1, ShadowFactor2, (clipSpacePosZ-cascadeSpace[0]) / (cascadeSpace[1]-cascadeSpace[0]));
+	}else if (clipSpacePosZ <= cascadeSpace[2]){
+		float ShadowFactor2 = calcShadowFactor(2, lightSpacePos[2]);
+		shadowFactor = ShadowFactor2;
+	}
+	
 	//单位化视线方向
 	vec3 viewDir = normalize(viewPos - fragPos);
 	vec3 result = vec3(0.0);
