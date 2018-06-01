@@ -5,14 +5,20 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.79.0 commit date:2018-03-22, commit time:14:10, hash:f4dc9f9d68b</authoring_tool>
     </contributor>
-    <created>2018-05-31T21:07:05</created>
-    <modified>2018-05-31T21:07:05</modified>
+    <created>2018-06-01T14:39:33</created>
+    <modified>2018-06-01T14:39:33</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_images>
     <image id="toad-bakeSurface_Color_jpg_001" name="toad-bakeSurface_Color_jpg_001">
       <init_from>toad-bakeSurface_Color.jpg.001.jpg</init_from>
+    </image>
+    <image id="toad-bakeSurface_Color_hn_jpg" name="toad-bakeSurface_Color_hn_jpg">
+      <init_from>toad-bakeSurface_Color_hn.jpg</init_from>
+    </image>
+    <image id="toad-bakeSurface_Color_s_jpg" name="toad-bakeSurface_Color_s_jpg">
+      <init_from>toad-bakeSurface_Color_s.jpg</init_from>
     </image>
   </library_images>
   <library_effects>
@@ -28,6 +34,26 @@
             <source>toad-bakeSurface_Color_jpg_001-surface</source>
           </sampler2D>
         </newparam>
+        <newparam sid="toad-bakeSurface_Color_s_jpg-surface">
+          <surface type="2D">
+            <init_from>toad-bakeSurface_Color_s_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="toad-bakeSurface_Color_s_jpg-sampler">
+          <sampler2D>
+            <source>toad-bakeSurface_Color_s_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="toad-bakeSurface_Color_hn_jpg-surface">
+          <surface type="2D">
+            <init_from>toad-bakeSurface_Color_hn_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="toad-bakeSurface_Color_hn_jpg-sampler">
+          <sampler2D>
+            <source>toad-bakeSurface_Color_hn_jpg-surface</source>
+          </sampler2D>
+        </newparam>
         <technique sid="common">
           <phong>
             <emission>
@@ -40,7 +66,7 @@
               <texture texture="toad-bakeSurface_Color_jpg_001-sampler"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.5 0.5 0.5 1</color>
+              <texture texture="toad-bakeSurface_Color_s_jpg-sampler"/>
             </specular>
             <shininess>
               <float sid="shininess">50</float>
@@ -49,6 +75,13 @@
               <float sid="index_of_refraction">1</float>
             </index_of_refraction>
           </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="toad-bakeSurface_Color_hn_jpg-sampler"/>
+              </bump>
+            </technique>
+          </extra>
         </technique>
       </profile_COMMON>
     </effect>
@@ -1336,57 +1369,6 @@
           </extra>
         </node>
       </node>
-      <node id="Null" name="Null" type="NODE">
-        <matrix sid="transform">1 -1.04614e-10 -1.18749e-9 4.229468 -9.49995e-7 0.9999999 3.72529e-8 3.088623 8.36909e-8 -7.45058e-9 1 1.05925 0 0 0 1</matrix>
-        <node id="Joint_Goal" name="Joint_Goal" type="NODE">
-          <matrix sid="transform">-0.7221556 -0.1344607 -0.6785363 -15.91814 -0.1267163 0.9900414 -0.06132721 -62.90456 0.6800252 0.04169379 -0.7320023 19.47855 0 0 0 1</matrix>
-        </node>
-        <node id="Joint_12_Goal" name="Joint_12_Goal" type="NODE">
-          <matrix sid="transform">-0.8793942 -0.4735403 0.04924618 -48.41557 -0.4754816 0.8683069 -0.1412815 105.5954 0.02414172 -0.1476579 -0.9887437 -11.84231 0 0 0 1</matrix>
-        </node>
-        <node id="Joint_12_Goal_2" name="Joint_12_Goal_2" type="NODE">
-          <matrix sid="transform">0.9584563 0.2632555 -0.1098093 60.41145 0.2833509 -0.9229554 0.2605105 -28.0107 -0.03276823 -0.2808025 -0.959206 -9.662132 0 0 0 1</matrix>
-        </node>
-        <node id="Joint_Goal_2" name="Joint_Goal_2" type="NODE">
-          <matrix sid="transform">-0.7390614 0.1327122 0.660436 25.81045 0.1261792 0.9903221 -0.05780072 -60.04137 -0.6617152 0.04061495 -0.7486544 11.53059 0 0 0 1</matrix>
-        </node>
-        <node id="Joint_Goal_3" name="Joint_Goal_3" type="NODE">
-          <matrix sid="transform">-0.7176383 -0.1408115 -0.6820318 -15.30305 -0.1350929 0.98889 -0.06201944 -59.7527 0.6831875 0.04763009 -0.728688 18.20427 0 0 0 1</matrix>
-        </node>
-        <node id="left_leg" name="left_leg" type="NODE">
-          <matrix sid="transform">0.999982 1.15261e-4 0.005991667 -7.613071 -1.15142e-4 1 -1.98781e-5 -53.88135 -0.005991667 1.91629e-5 0.999982 -14.50014 0 0 0 1</matrix>
-        </node>
-        <node id="left_leg_Pole" name="left_leg_Pole" type="NODE">
-          <matrix sid="transform">0.9996321 -0.02428255 0.01208393 -20.10262 0.02496957 0.9978625 -0.06038934 9.489532 -0.0105917 0.06066883 0.9981018 22.80008 0 0 0 1</matrix>
-        </node>
-        <node id="Joint_Goal_4" name="Joint_Goal_4" type="NODE">
-          <matrix sid="transform">-0.7390614 0.1327122 0.660436 22.99195 0.1261792 0.9903221 -0.05780072 -63.60692 -0.6617152 0.04061495 -0.7486544 23.27633 0 0 0 1</matrix>
-        </node>
-        <node id="right_leg" name="right_leg" type="NODE">
-          <matrix sid="transform">0.999982 1.15261e-4 0.005991667 13.30818 -1.15142e-4 1 -1.98781e-5 -47.66978 -0.005991667 1.91629e-5 0.999982 -15.58269 0 0 0 1</matrix>
-        </node>
-        <node id="right_leg_Pole" name="right_leg_Pole" type="NODE">
-          <matrix sid="transform">0.9996772 0.02178013 -0.01308043 33.04851 -0.02252881 0.9979372 -0.06011599 13.11188 0.01174411 0.06039126 0.9981057 21.3119 0 0 0 1</matrix>
-        </node>
-        <node id="Joint_10_Pole" name="Joint_10_Pole" type="NODE">
-          <matrix sid="transform">0.06388089 0.07701923 0.994981 23.64848 0.8832183 0.4597899 -0.09229667 92.67305 -0.4645909 0.8846814 -0.038653 16.21681 0 0 0 1</matrix>
-        </node>
-        <node id="left_hand" name="left_hand" type="NODE">
-          <matrix sid="transform">0.7456071 -0.2535903 -0.6162483 -53.75436 0.0630946 0.9474725 -0.3135523 71.3752 0.6633921 0.1949048 0.7224423 -11.42389 0 0 0 1</matrix>
-        </node>
-        <node id="left_hand_Pole" name="left_hand_Pole" type="NODE">
-          <matrix sid="transform">0.9848881 0.1673793 -0.04449236 -77.06689 -0.1121137 0.8119661 0.5728363 61.24612 0.1320072 -0.5591916 0.8184612 -12.2348 0 0 0 1</matrix>
-        </node>
-        <node id="Joint_10_Pole_2" name="Joint_10_Pole_2" type="NODE">
-          <matrix sid="transform">0.07040665 0.1180008 -0.9905143 -25.989 -0.8125444 0.5827826 0.01167096 -5.979507 0.5786317 0.8040151 0.1369126 3.876793 0 0 0 1</matrix>
-        </node>
-        <node id="right_hand" name="right_hand" type="NODE">
-          <matrix sid="transform">1 2.58421e-9 2.16577e-9 47.5677 0 1 -4.47035e-8 12.16966 -7.10543e-15 2.23517e-8 1 -15.41078 0 0 0 1</matrix>
-        </node>
-        <node id="right_hand_Pole" name="right_hand_Pole" type="NODE">
-          <matrix sid="transform">0.9973331 -0.0136611 0.07169208 49.61976 0.003064538 0.9892974 0.1458812 22.00653 -0.07291768 -0.1452725 0.9867009 -46.55135 0 0 0 1</matrix>
-        </node>
-      </node>
       <node id="Subdivision_Surface_2" name="Subdivision_Surface_2" type="NODE">
         <translate sid="location">0 0 0</translate>
         <rotate sid="rotationZ">0 0 1 0</rotate>
@@ -1397,9 +1379,7 @@
           <skeleton>#toad_spaine</skeleton>
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material_001-material" target="#Material_001-material">
-                <bind_vertex_input semantic="UVW" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
+              <instance_material symbol="Material_001-material" target="#Material_001-material"/>
             </technique_common>
           </bind_material>
         </instance_controller>

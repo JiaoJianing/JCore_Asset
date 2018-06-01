@@ -18,8 +18,35 @@ struct DirLight{
 	vec3 direction;
 };
 
+struct Attenuation
+{
+	float constant;
+	float linear;
+	float exp;
+};
+
+struct PointLight{
+	BaseLight base;
+	Attenuation attenuation;
+	vec3 position;
+};
+
+struct SpotLight{
+	PointLight base;
+	vec3 direction;
+	float cutoff;
+};
+
+#define MAX_DIR_LIGHTS 2
+#define MAX_POINT_LIGHTS 10
+#define MAX_SPOT_LIGHTS 10
 uniform Material material;
-uniform DirLight dirLight;
+uniform DirLight dirLights[MAX_DIR_LIGHTS];
+uniform int dirLightNum;
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform int pointLightNum;
+uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
+uniform int spotLightNum;
 
 uniform vec3 viewPos;
 uniform bool g_highLight;
@@ -37,6 +64,10 @@ in float clipSpacePosZ;
 vec3 calcLightCommon(BaseLight light, vec3 lightDirection, vec3 normal, float shadowFactor);
 //计算方向光照
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir, float shadowFactor);
+//计算点光照
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, float shadowFactor);
+//计算聚光
+vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir, float shadowFactor);
 
 //计算shadowmap
 float calcShadowFactor(int index, vec4 lSpacePos);
@@ -66,7 +97,17 @@ void main()
 	vec3 viewDir = normalize(viewPos - fragPos);
 	vec3 result = vec3(0.0);
 	//平行光照
-	result += calcDirLight(dirLight, normal, viewDir, shadowFactor);
+	for (int i=0; i<dirLightNum; i++){
+		result += calcDirLight(dirLights[i], normal, viewDir, shadowFactor);
+	}
+	//点光照
+	for (int i=0; i<pointLightNum; i++){
+		result += calcPointLight(pointLights[i], normal, viewDir, shadowFactor);
+	}
+	//聚光灯
+	for (int i=0; i<spotLightNum; i++){
+		result += calcSpotLight(spotLights[i], normal, viewDir, shadowFactor);
+	}
 	
 	//高亮效果
 	if (g_highLight){
@@ -99,6 +140,30 @@ vec3 calcLightCommon(BaseLight light, vec3 lightDirection, vec3 normal, vec3 vie
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir, float shadowFactor){	
 	return calcLightCommon(light.base, normalize(light.direction), normal, viewDir, shadowFactor);
+}
+
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir, float shadowFactor){
+	vec3 lightDirection = light.position - fragPos;
+	float distance = length(lightDirection);
+	
+	vec3 result = calcLightCommon(light.base, normalize(lightDirection), normal, viewDir, shadowFactor);
+	float attenuation = light.attenuation.constant + 
+						light.attenuation.linear * distance +
+						light.attenuation.exp * distance * distance;
+	return result / attenuation;
+}
+
+vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir, float shadowFactor){
+	vec3 lightDirection = normalize(fragPos - light.base.position);
+	float spotFactor = dot(lightDirection, normalize(light.direction));
+
+	vec3 result = vec3(0.0);
+	if (spotFactor > light.cutoff){
+		result = calcPointLight(light.base, normal, viewDir, shadowFactor);
+		return result * (1.0 - (1.0 - spotFactor) * 1.0 / (1.0 - light.cutoff));
+	}
+
+	return result;
 }
 
 float calcShadowFactor(int index, vec4 lSpacePos){

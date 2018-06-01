@@ -5,14 +5,20 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.79.0 commit date:2018-03-22, commit time:14:10, hash:f4dc9f9d68b</authoring_tool>
     </contributor>
-    <created>2018-05-31T16:39:29</created>
-    <modified>2018-05-31T16:39:29</modified>
+    <created>2018-06-01T13:36:56</created>
+    <modified>2018-06-01T13:36:56</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_images>
     <image id="turtlesd_DefaultMaterial_BaseColor_png" name="turtlesd_DefaultMaterial_BaseColor_png">
       <init_from>turtlesd_DefaultMaterial_BaseColor.png</init_from>
+    </image>
+    <image id="turtlesd_DefaultMaterial_Normal_png" name="turtlesd_DefaultMaterial_Normal_png">
+      <init_from>turtlesd_DefaultMaterial_Normal.png</init_from>
+    </image>
+    <image id="turtlesd_DefaultMaterial_Normal_s_png" name="turtlesd_DefaultMaterial_Normal_s_png">
+      <init_from>turtlesd_DefaultMaterial_Normal_s.png</init_from>
     </image>
   </library_images>
   <library_effects>
@@ -28,6 +34,26 @@
             <source>turtlesd_DefaultMaterial_BaseColor_png-surface</source>
           </sampler2D>
         </newparam>
+        <newparam sid="turtlesd_DefaultMaterial_Normal_s_png-surface">
+          <surface type="2D">
+            <init_from>turtlesd_DefaultMaterial_Normal_s_png</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="turtlesd_DefaultMaterial_Normal_s_png-sampler">
+          <sampler2D>
+            <source>turtlesd_DefaultMaterial_Normal_s_png-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="turtlesd_DefaultMaterial_Normal_png-surface">
+          <surface type="2D">
+            <init_from>turtlesd_DefaultMaterial_Normal_png</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="turtlesd_DefaultMaterial_Normal_png-sampler">
+          <sampler2D>
+            <source>turtlesd_DefaultMaterial_Normal_png-surface</source>
+          </sampler2D>
+        </newparam>
         <technique sid="common">
           <phong>
             <emission>
@@ -40,7 +66,7 @@
               <texture texture="turtlesd_DefaultMaterial_BaseColor_png-sampler"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.5 0.5 0.5 1</color>
+              <texture texture="turtlesd_DefaultMaterial_Normal_s_png-sampler"/>
             </specular>
             <shininess>
               <float sid="shininess">50</float>
@@ -49,6 +75,13 @@
               <float sid="index_of_refraction">1</float>
             </index_of_refraction>
           </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="turtlesd_DefaultMaterial_Normal_png-sampler"/>
+              </bump>
+            </technique>
+          </extra>
         </technique>
       </profile_COMMON>
     </effect>

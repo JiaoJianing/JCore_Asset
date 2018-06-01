@@ -19,7 +19,7 @@ out vec2 texCoord;
 out vec4 lightSpacePos[3];
 out float clipSpacePosZ;
 out vec3 fragPos;
-out vec3 worldNormal;
+out mat3 TBN;
 
 void main()						
 {			
@@ -38,5 +38,10 @@ void main()
 	}
 	clipSpacePosZ = gl_Position.z;
 
-	worldNormal = normalize(transpose(inverse(mat3(model * BoneTransform))) * aNormal);
+	//º∆À„TBNæÿ’Û
+	vec3 T = normalize(vec3(model * BoneTransform * vec4(aTangent, 0.0)));
+	vec3 N = normalize(vec3(model * BoneTransform * vec4(aNormal, 0.0)));
+	T = normalize(T - dot(T, N) * N);
+	vec3 B = cross(T, N);
+	TBN = mat3(T, B, N);
 };
